@@ -1,3 +1,4 @@
+import copy
 ####### SETUP
 with open("day5_input.txt", "r") as file:
     lines = file.readlines()
@@ -43,15 +44,31 @@ for seed in seeds:
         lowest_location = current_val
 print(f"PART 1 LOWEST LOCATION: {lowest_location}")
 
-####### PART 2 (need to optimize)
-lowest_location = float("inf")
-for i in range(0, len(seeds), 2):
-    print(f"\n{seeds[i]} - {seeds[i] + seeds[i+1]}")
-    for seed in range(seeds[i], seeds[i] + seeds[i+1]):
-        print(f"\r{seed}", end="", flush=True)
-        current_val = seed
-        for mode in MODES:
-            current_val = convertType(current_val, mode)
-        if current_val < lowest_location:
-            lowest_location = current_val
+####### PART 2 
+for mode in MODES:
+    new_seeds = []
+    converted_seeds = []
+
+    while seeds:
+        for i in range(0, len(seeds), 2):
+            converted = False
+            for conversion in conversion_map[mode]:
+                end_range = conversion["source"] + conversion["range"]
+                if seeds[i] in range(conversion["source"], end_range):
+                    converted = True
+                    remaining_spaces = end_range - seeds[i] - 1
+                    if seeds[i+1] - remaining_spaces <= 0:
+                        converted_seeds.extend([convertType(seeds[i], mode), seeds[i+1]])
+                    else:
+                        new_seeds.extend([seeds[i] + remaining_spaces + 1, seeds[i+1] - remaining_spaces - 1])
+                        converted_seeds.extend([convertType(seeds[i], mode), remaining_spaces + 1])
+            if not converted:
+                converted_seeds.extend([seeds[i], seeds[i+1]])
+
+        seeds = copy.deepcopy(new_seeds)
+        new_seeds.clear()
+
+    seeds = copy.deepcopy(converted_seeds)
+
+lowest_location = min(seeds[::2])
 print(f"PART 2 LOWEST LOCATION: {lowest_location}")
