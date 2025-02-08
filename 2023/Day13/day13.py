@@ -1,4 +1,3 @@
-import copy
 ####### SETUP
 with open("day13_input.txt", "r") as file:
     lines = file.readlines()
