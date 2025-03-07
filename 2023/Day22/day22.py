@@ -5,17 +5,17 @@ with open("day22_input.txt", "r") as file:
 
 ####### PART 1
 class Brick:
-    def __init__(self, brick_coordinates):
+    def __init__(self, id, brick_coordinates):
+        self.id = id
         brick_start = [int(val) for val in brick_coordinates.split("~")[0].split(",")]
         brick_end = [int(val) for val in brick_coordinates.split("~")[1].split(",")]
 
-        if brick_start[0] != brick_end[0]: self.points = [[i, brick_start[1], brick_start[2]] for i in range(brick_start[0], brick_end[0]+1)]
-        if brick_start[1] != brick_end[1]: self.points = [[brick_start[0], i, brick_start[2]] for i in range(brick_start[1], brick_end[1]+1)]
-        if brick_start[2] != brick_end[2]: self.points = [[brick_start[0], brick_start[1], i] for i in range(brick_start[2], brick_end[2]+1)]
+        if brick_start[0] != brick_end[0]: self.points = [[i, brick_start[1], brick_start[2]] for i in range(brick_start[0], brick_end[0]+1)] # will probably have to convert to ranges cause taking a long time
+        elif brick_start[1] != brick_end[1]: self.points = [[brick_start[0], i, brick_start[2]] for i in range(brick_start[1], brick_end[1]+1)]
+        elif brick_start[2] != brick_end[2]: self.points = [[brick_start[0], brick_start[1], i] for i in range(brick_start[2], brick_end[2]+1)]
+        else: self.points = [[brick_start[0], brick_start[1], brick_start[2]]]
 
         self.on_ground = self.checkOnGround()
-        # def fall decreases all z by 1
-        # def collision checks if any brick points are the same
 
     def checkOnGround(self):
         return any(point[2] == 1 for point in self.points)
@@ -47,8 +47,20 @@ def settleBricks(bricks):
                     falling = True
     return bricks
 
-settled_bricks = settleBricks([Brick(line) for line in brick_coordinates])
-for brick in settled_bricks:
-    print(brick.points)
-    print("---")
-# now need to check for disintegrations
+def disintegratableBricks(bricks):
+    brick_supports = {brick.id: [] for brick in bricks}
+    disintegratable_bricks = [brick.id for brick in bricks]
+    for brick1 in bricks:
+        for brick2 in bricks:
+            if brick1 != brick2 and brick1.checkCollision(brick2):
+                brick_supports[brick1.id].append(brick2.id)
+    
+    for brick in brick_supports:
+        if len(brick_supports[brick]) == 1:
+            if brick_supports[brick][0] in disintegratable_bricks:
+                disintegratable_bricks.remove(brick_supports[brick][0])
+    return disintegratable_bricks
+
+
+settled_bricks = settleBricks([Brick(i, line) for i, line in enumerate(brick_coordinates)])
+print(f"PART 1 TOTAL DISINTEGRATIONS: {len(disintegratableBricks(settled_bricks))}")
