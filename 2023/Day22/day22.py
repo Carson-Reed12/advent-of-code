@@ -48,19 +48,52 @@ def settleBricks(bricks):
     return bricks
 
 def disintegratableBricks(bricks):
-    brick_supports = {brick.id: [] for brick in bricks}
+    supported_by = {brick.id: [] for brick in bricks}
     disintegratable_bricks = [brick.id for brick in bricks]
     for brick1 in bricks:
         for brick2 in bricks:
             if brick1 != brick2 and brick1.checkCollision(brick2):
-                brick_supports[brick1.id].append(brick2.id)
+                supported_by[brick1.id].append(brick2.id)
     
-    for brick in brick_supports:
-        if len(brick_supports[brick]) == 1:
-            if brick_supports[brick][0] in disintegratable_bricks:
-                disintegratable_bricks.remove(brick_supports[brick][0])
-    return disintegratable_bricks
+    for brick in supported_by:
+        if len(supported_by[brick]) == 1:
+            if supported_by[brick][0] in disintegratable_bricks:
+                disintegratable_bricks.remove(supported_by[brick][0])
+    return disintegratable_bricks, supported_by
 
-
+print("Settling bricks...")
 settled_bricks = settleBricks([Brick(i, line) for i, line in enumerate(brick_coordinates)])
-print(f"PART 1 TOTAL DISINTEGRATIONS: {len(disintegratableBricks(settled_bricks))}")
+print("Checking disintegrations...")
+disintegratable_bricks, supported_by = disintegratableBricks(settled_bricks)
+print(f"PART 1 TOTAL DISINTEGRATIONS: {len(disintegratable_bricks)}")
+
+####### PART 2
+def convertSupports(supported_by):
+    bricks_supported = {id: [] for id in supported_by}
+
+    for id in supported_by:
+        for brick in supported_by[id]:
+            bricks_supported[brick].append(id)
+
+    return bricks_supported
+
+def fallingCount(initial_id, supported_by, bricks_supported):
+    supports = copy.deepcopy(supported_by)
+    queue = [initial_id]
+    total = 0
+
+    while queue:
+        brick = queue.pop()
+        for supported_brick in bricks_supported[brick]:
+            supports[supported_brick].remove(brick)
+            if not supports[supported_brick]:
+                queue.append(supported_brick)
+                total += 1
+    
+    return total
+
+bricks_supported = convertSupports(supported_by)
+falling_count = 0
+for i in supported_by:
+    falling_count += fallingCount(i, supported_by, bricks_supported)
+print(f"PART 2 TOTAL FALLING: {falling_count}")
