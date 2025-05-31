@@ -80,7 +80,6 @@ class Rope:
         current_tail = self.knots[knot_id].tail
         self.knots[knot_id].move(direction)
         new_dir = direction_map[str([current_tail[0] - self.knots[knot_id].tail[0], current_tail[1] - self.knots[knot_id].tail[1]])]
-        print(new_dir)
 
         while new_dir and knot_id < len(self.knots)-1:
             knot_id += 1
@@ -88,45 +87,12 @@ class Rope:
             current_tail = self.knots[knot_id].tail
             self.knots[knot_id].move(new_dir)
             new_dir = direction_map[str([current_tail[0] - self.knots[knot_id].tail[0], current_tail[1] - self.knots[knot_id].tail[1]])]
-            # print(f"{knot_id} NEW DIR: {new_dir}")
 
-def initializeBoard(size):
-    board = []
-    for _ in range(size):
-        board.append(list("."*size))
-    return board
-
-def resetBoard(board):
-    for y, line in enumerate(board):
-        for x, char in enumerate(line):
-            if char == "#":
-                board[y][x] = "."
-
-def printBoard(rope, board):
-    resetBoard(board)
-    for knot in rope.knots:
-        head = knot.head
-        board[head[0] + len(board)//2][head[1] + len(board)//2] = "#"
-
-    board[rope.knots[-2].tail[0] + len(board)//2][rope.knots[-2].tail[1] + len(board)//2] = "@"
-    
-    for line in board:
-        print("".join(line))
-
-def printStats(rope):
-    for i in range(len(rope.knots)):
-        print(f"Knot {i} - Head: {rope.knots[i].head} - Tail: {rope.knots[i].tail}")
-
-rope = Rope(10)
-board = initializeBoard(50)
+rope = Rope(9)
 for move in moves:
     direction = move.split()[0]
     num_moves = int(move.split()[-1])
     for _ in range(num_moves):
         rope.move(direction)
-        #print(f"Direction: {direction}")
-        #printBoard(rope, board)
-        ##input()
 
-print(len(rope.knots[-2].tail_positions))
-print(rope.knots[-2].tail_positions)
+print(f"PART 2 TAIL LOCATIONS: {len(rope.knots[-1].tail_positions)}")
