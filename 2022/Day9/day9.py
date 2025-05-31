@@ -1,4 +1,4 @@
-####### SETUP
+####### SETUP 
 with open("day9_input.txt", "r") as file:
     moves = file.readlines()
 
