@@ -3,7 +3,6 @@ with open("day13_input.txt", "r") as file:
     lines = file.readlines()
 
 ####### PART 1
-
 def createList(line):
     list_queue = []
     current_val = ""
@@ -71,4 +70,22 @@ for line in lines:
         pair.clear()
         pair_counter += 1
 
-print(f"PAIR SUM: {total}")
+print(f"PART 1 PAIR SUM: {total}")
+
+####### PART 2
+def sortLists(all_lists):
+    for i in range(len(all_lists)):
+        swapped = False
+        for j in range(len(all_lists) - i - 1):
+            if not compareLists([all_lists[j], all_lists[j+1]]):
+                all_lists[j], all_lists[j+1] = all_lists[j+1], all_lists[j]
+                swapped = True
+        # if not swapped:
+        #     break
+
+
+all_lists = [createList(line.strip()) for line in lines if line != "\n"]
+all_lists.extend([[2], [6]])
+sortLists(all_lists)
+decoder_key = (all_lists.index([2]) + 1) * (all_lists.index([6]) + 1)
+print(f"PART 2 DECODER KEY: {decoder_key}")
