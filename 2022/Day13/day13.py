@@ -31,17 +31,44 @@ def createList(line):
 def compareLists(pair):
     list1, list2 = pair[0], pair[1]
 
-    
+    for val1, val2 in zip(list1, list2):
+        if isinstance(val1, int) and isinstance(val2, int):
+            if val1 < val2: return True
+            elif val1 > val2: return False
+        elif isinstance(val1, list) and isinstance(val2, list):
+            comparison = compareLists([val1, val2])
+            if comparison != -1:
+                return comparison
+        else:
+            if isinstance(val1, int):
+                listed_val1 = [val1]
+                comparison = compareLists([listed_val1, val2])
+                if comparison != -1:
+                    return comparison
+            else:
+                listed_val2 = [val2]
+                comparison = compareLists([val1, listed_val2])
+                if comparison != -1:
+                    return comparison
+
+    if len(list1) < len(list2):
+        return True
+    elif len(list1) > len(list2):
+        return False
+    else:
+        return -1
 
 pair = []
 pair_counter = 1
 total = 0
 for line in lines:
-    if line:
-        pairs.append(createList(line.strip()))
-    else:
+    if line != "\n":
+        pair.append(createList(line.strip()))
+    if len(pair) == 2:
         if compareLists(pair):
             total += pair_counter
 
         pair.clear()
-        pair_counter = 0
+        pair_counter += 1
+
+print(f"PAIR SUM: {total}")
