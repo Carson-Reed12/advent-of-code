@@ -80,9 +80,6 @@ def sortLists(all_lists):
             if not compareLists([all_lists[j], all_lists[j+1]]):
                 all_lists[j], all_lists[j+1] = all_lists[j+1], all_lists[j]
                 swapped = True
-        # if not swapped:
-        #     break
-
 
 all_lists = [createList(line.strip()) for line in lines if line != "\n"]
 all_lists.extend([[2], [6]])
