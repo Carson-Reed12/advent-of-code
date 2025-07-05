@@ -24,14 +24,14 @@ def getRange(rock_lines):
 
     return min_x, max_x, max_y
 
-def initializeBoard(rock_lines):
+def initializeBoard(rock_lines, padding = 3):
     board = []
 
     min_x, max_x, max_y = getRange(rock_lines)
-    for _ in range(max_y+1):
-        board.append(list("." * (max_x - min_x + 3)))
+    for _ in range(max_y+2):
+        board.append(list("." * (max_x - min_x + padding)))
 
-    convertPosX = lambda a : a - min_x + 1
+    convertPosX = lambda a : a - min_x + (padding // 2)
 
     drawRocks(board, rock_lines, convertPosX)
 
@@ -58,8 +58,27 @@ def printBoard(board):
         print(''.join(line))
 
 class Sand():
-    def __init__(self, board, convertPosX):
-        self.pos = [convertPosX(500), 0]
+    def __init__(self, board, convertPosX, prior_path = None, floor = False):
+        self.floor = floor
+
+        if not prior_path:
+            self.prior_path = [[convertPosX(500), 0]]
+        else:
+            self.prior_path = prior_path
+
+        self.determineSource(board)
+
+    def determineSource(self, board):
+        points_removed = 0
+        for pos in self.prior_path[::-1]:
+            if board[pos[1]][pos[0]] == ".":
+                self.pos = pos
+                break
+            else:
+                points_removed += 1
+
+        if points_removed > 0:
+            self.prior_path = self.prior_path[:points_removed * -1]
         self.drawSand(self.pos, board)
 
     def fall(self, board):
@@ -70,11 +89,13 @@ class Sand():
             if board[self.pos[1] + 1][self.pos[0]] == ".":
                 self.drawSand([self.pos[0], self.pos[1] + 1], board)
                 self.pos = [self.pos[0], self.pos[1] + 1]
+                self.prior_path.append(self.pos)
                 return [self.pos[0], self.pos[1] + 1]
             if 0 <= self.pos[0] - 1 < size_x:
                 if board[self.pos[1] + 1][self.pos[0] - 1] == ".":
                     self.drawSand([self.pos[0] - 1, self.pos[1] + 1], board)
                     self.pos = [self.pos[0] - 1, self.pos[1] + 1]
+                    self.prior_path.append(self.pos)
                     return [self.pos[0] - 1, self.pos[1] + 1]   
             else:
                 board[self.pos[1]][self.pos[0]] = "."
@@ -83,13 +104,20 @@ class Sand():
                 if board[self.pos[1] + 1][self.pos[0] + 1] == ".":
                     self.drawSand([self.pos[0] + 1, self.pos[1] + 1], board)
                     self.pos = [self.pos[0] + 1, self.pos[1] + 1]
+                    self.prior_path.append(self.pos)
                     return [self.pos[0] + 1, self.pos[1] + 1]   
             else:
                 board[self.pos[1]][self.pos[0]] = "."
                 return "voided"
+            board[self.pos[1]][self.pos[0]] = "o"
+            return self.pos
         else:
-            board[self.pos[1]][self.pos[0]] = "."
-            return "voided"
+            if not self.floor:
+                board[self.pos[1]][self.pos[0]] = "."
+                return "voided"
+            else:
+                board[self.pos[1]][self.pos[0]] = "o"
+                return self.pos            
 
 
     def drawSand(self, next_pos, board):
@@ -114,4 +142,22 @@ while True:
         last_pos = new_pos
     else:
         sand = Sand(board, convertPosX)
+        last_pos = [convertPosX(500), 0]
+
 print(f"PART 1 SAND COUNT: {countSand(board)}")
+
+####### PART 2
+board, convertPosX = initializeBoard(rock_lines, padding = 316)
+sand = Sand(board, convertPosX, floor = True)
+last_pos = []
+while True:
+    new_pos = sand.fall(board)
+
+    if new_pos != last_pos:
+        last_pos = new_pos
+    elif new_pos == [convertPosX(500), 0]:
+        break
+    else:
+        sand = Sand(board, convertPosX, prior_path = sand.prior_path, floor = True)
+
+print(f"PART 2 SAND COUNT: {countSand(board)}")
