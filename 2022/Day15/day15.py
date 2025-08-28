@@ -33,5 +33,11 @@ class Sensor():
 # Could have some sort of function that returns a list of exclusive positions given a line number
 # Then, extend all lists into one master list. Then make it a set, and get the length for the total count?
 sensors = [Sensor(line) for line in line_sensors]
-print(sensors[6].lineLength(10))
-
+master_positions = []
+for sensor in sensors:
+    master_positions.extend(sensor.lineLength(2000000))
+for sensor in sensors:
+    if sensor.pos in master_positions:
+        master_positions.remove(sensor.pos)
+master_positions = [str(pos) for pos in master_positions]
+print(len(set(master_positions)))
