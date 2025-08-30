@@ -23,21 +23,76 @@ class Sensor():
         if y_offset > self.distance:
             return []
 
-        total_positions = [[x, y_val] for x in range(self.pos[0] - self.distance + y_offset, self.pos[0] + self.distance - y_offset + 1)]
-        # Location of closest beacon doesn't count
-        if self.closest_beacon in total_positions:
-            total_positions.remove(self.closest_beacon)
+        total_positions = [self.pos[0] - self.distance + y_offset, self.pos[0] + self.distance - y_offset]
+
         return total_positions
+
+
+def mergeRanges(arr1, arr2):
+    if arr2[1]+1 < arr1[0]:
+        return arr1, arr2
+    if arr2[0]-1 > arr1[1]:
+        return arr1, arr2
+    return [min([arr1[0], arr2[0]]), max([arr1[1], arr2[1]])], None
         
 
-# Could have some sort of function that returns a list of exclusive positions given a line number
-# Then, extend all lists into one master list. Then make it a set, and get the length for the total count?
-sensors = [Sensor(line) for line in line_sensors]
-master_positions = []
-for sensor in sensors:
-    master_positions.extend(sensor.lineLength(2000000))
-for sensor in sensors:
-    if sensor.pos in master_positions:
-        master_positions.remove(sensor.pos)
-master_positions = [str(pos) for pos in master_positions]
-print(len(set(master_positions)))
+#### PART 2
+sensors = [Sensor(line) for line in line_sensors] 
+for i in range(4000001):
+    print(f"\r{i}", end="", flush=True)
+    master_ranges = []
+    for sensor in sensors:
+        sensor_range = sensor.lineLength(i)
+        if sensor_range:
+            master_ranges.append(sensor.lineLength(i))
+
+    while True:
+        new_merge = None
+        poppers = []
+        for j in range(len(master_ranges)):
+            for k in range(j+1, len(master_ranges)):
+                merge1, merge2 = mergeRanges(master_ranges[j], master_ranges[k])
+                if not merge2:
+                    new_merge = merge1
+                    super_break = True
+                    poppers = [k, j]
+                    break
+            if super_break:
+                break
+        for popper in poppers:
+            master_ranges.pop(popper)
+        if new_merge:
+            master_ranges.append(new_merge)
+        else:
+            break
+
+    if len(master_ranges) > 1:
+        x = min(master_ranges[0][1], master_ranges[1][1])+1
+        print()
+        print(f"{x}, {i}")
+        print((x*4000000)+i)
+        
+        
+        input()
+
+
+# for i in range(4000001):
+#     master_positions = []
+#     for sensor in sensors:
+#         master_positions.extend(sensor.lineLength(i))
+#         if sensor.pos[1] == i:
+#             master_positions.append(sensor.pos[0])
+#         if sensor.closest_beacon[1] == i:
+#             master_positions.append(sensor.closest_beacon[0])
+# 
+#     master_positions = list(set(master_positions))
+#     if master_positions[0] == 0 and master_positions[4000000] == 4000000:
+#         print(f"{i}: FULL")
+#     else:
+#         print(f"{i}: NOT FULL")
+#         for j in range(4000001):
+#             if j not in master_positions:
+#                 print(f"FINAL BEACON: {j}, {i}")
+#                 print(f"FREQUENCY: {(j*4000000)+i}")
+#                 break
+# 
