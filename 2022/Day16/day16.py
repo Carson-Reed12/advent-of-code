@@ -45,8 +45,6 @@ def maxPressure(valve, activated, depth, pressure, last_nodes):
 
     if not scores:
         return pressure
-    if max(scores) > current_max:
-        current_max = max(scores)
     return max(scores)
 
 
@@ -54,6 +52,5 @@ valves = {
     re.search(r"Valve (\w\w) has", line).group(1): Valve(line) for line in valve_lines
 }
 starting_valve = [valves[valve_id] for valve_id in valves if valve_id == "AA"][0]
-starting_valve.print()
 max_pressure = maxPressure(starting_valve, [], 30, 0, [])
 print(f"PART 1 MAX PRESSURE: {max_pressure}")
